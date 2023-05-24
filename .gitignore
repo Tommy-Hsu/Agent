@@ -1,0 +1,9 @@
+demo1/logs/
+demo2/logs/
+Agent-master/
+Agent-master 2/
+*.zip
+.DS_Store
+*.md
+*.txt
+*.ovpn
