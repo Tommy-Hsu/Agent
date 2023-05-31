@@ -70,36 +70,27 @@ class Agent():
                 # print(f"Receive '{message}' from {data.addr}")
                 logger.info(f"Receive '{message}' from {data.addr}")
 
-                # 腦波團隊
+                # 腦波團隊 護理站去配膳間
                 if message == "give_me_water" and not(self.busy):
-                    # 護理站去配膳間
-                    if self.robot_location == "0": 
-                        self.forward_command("self_move_OW")
-                        data.outb += b"OK"
-                    # 病房去配膳間
-                    elif self.robot_location == "315":
-                        self.forward_command("self_move_BA")
-                        data.outb += b"OK"
+                    self.forward_command("self_move_OW")
+                    data.outb += b"OK"
                     self.busy = 1
-                    # else:
-                    #     data.outb += b"robot_busy" # Robot busy
+                
+                # 語音團隊 配膳間去病房
+                elif message == "put_water_into_robot" and not(self.busy):
+                    self.forward_command("self_move_WA")
+                    data.outb += b"OK"
+                    self.busy = 3
+                
                 elif message == "robot_go_back" and not(self.busy):
                     self.forward_command("self_move_AO")
                     data.outb += b"OK"
                     self.busy = 4
-                elif message == "Idle":
-                    data.outb += b"OK"
-                    # self.forward_command("self_move_BO")
+
                 # 讓機器人說話
-                elif message == "water":
-                    data.outb += b"OK"
-                    self.forward_command("userA_want_water")
-                
-                # 語音團隊
-                elif message == "put_water_into_robot" and not(self.busy):
-                    data.outb += b"OK"
-                    self.forward_command("self_move_WA")
-                    self.busy = 3
+                # elif message == "water":
+                #     data.outb += b"OK"
+                #     self.forward_command("userA_want_water")
 
                 # 機器人團隊
                 elif message == "agv_shut_down":
@@ -107,11 +98,11 @@ class Agent():
                     self.forward_command("debug")
 
                 # 更新機器人位置(debug用) && 解除機器人忙碌狀態
-                elif message in self.location_list:
-                    self.robot_location = message
-                    if self.robot_location in self.location_list:
-                        self.busy = 0
-                    data.outb += b"OK"
+                # elif message in self.location_list:
+                #     self.robot_location = message
+                #     if self.robot_location in self.location_list:
+                #         self.busy = 0
+                #     data.outb += b"OK"
 
                 # 解除機器人狀態
                 elif message == "rbf":
@@ -121,8 +112,8 @@ class Agent():
                 else:
                     if self.busy == 1:
                         data.outb += b"robot_goto_kitchen"
-                    elif self.busy == 2:
-                        data.outb += b"caregiver_busy"
+                    # elif self.busy == 2:
+                    #     data.outb += b"caregiver_busy"
                     elif self.busy == 3:
                         data.outb += b"robot_coming"
                     elif self.busy == 4:
@@ -155,7 +146,16 @@ class Agent():
             # print(f"Send command: {command}")
             logger.info(f"Send command: {command}")
 
+            # blocking
             data = s.recv(1024)
+            # non-blocking
+            # s.settimeout(3)
+            # try:
+            #     data = s.recv(1024)
+            #     logger.info(f"Receive: {data.decode()}")
+            # except:
+            #     print("Timeout")
+
             # print(f"Receive: {data.decode()}")
             logger.info(f"Receive: {data.decode()}")
 
